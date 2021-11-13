@@ -152,7 +152,7 @@ func (m *Machine) IsControlPlane() bool {
 }
 
 // ImageVersion returns the version of the image used or nil if not specified
-// NOTE: Image version might be different from the Kubernetes version, because some characters
+// NOTE: ImageID version might be different from the Kubernetes version, because some characters
 // allowed by semver (e.g. +) can't be used for image tags, so they are replaced with "_".
 func (m *Machine) ImageVersion() string {
 	if m.image == "" {

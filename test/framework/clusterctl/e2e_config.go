@@ -337,7 +337,7 @@ func errEmptyArg(argName string) error {
 // - ManagementClusterName should not be empty.
 // - There should be one CoreProvider (cluster-api), one BootstrapProvider (kubeadm), one ControlPlaneProvider (kubeadm).
 // - There should be one InfraProvider (pick your own).
-// - Image should have name and loadBehavior be one of [mustload, tryload].
+// - ImageID should have name and loadBehavior be one of [mustload, tryload].
 // - Intervals should be valid ginkgo intervals.
 func (c *E2EConfig) Validate() error {
 	// ManagementClusterName should not be empty.
@@ -349,7 +349,7 @@ func (c *E2EConfig) Validate() error {
 		return err
 	}
 
-	// Image should have name and loadBehavior be one of [mustload, tryload].
+	// ImageID should have name and loadBehavior be one of [mustload, tryload].
 	for i, containerImage := range c.Images {
 		if containerImage.Name == "" {
 			return errEmptyArg(fmt.Sprintf("Images[%d].Name=%q", i, containerImage.Name))

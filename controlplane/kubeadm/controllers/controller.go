@@ -264,6 +264,10 @@ func (r *KubeadmControlPlaneReconciler) reconcile(ctx context.Context, cluster *
 		log.Info("Cluster does not yet have a ControlPlaneEndpoint defined")
 		return ctrl.Result{}, nil
 	}
+	// TODO: MAK enhance it further for inclusion of the hosts in the APIServer array
+	config.ClusterConfiguration.APIServer.CertSANs = append(config.ClusterConfiguration.APIServer.CertSANs, cluster.Spec.ControlPlaneEndpoint.Host, cluster.Spec.ControlPlaneEndpointInternal.Host)
+	config.ClusterConfiguration.ControlPlaneEndpoint = fmt.Sprintf("%s:%d", cluster.Spec.ControlPlaneEndpointInternal.Host, cluster.Spec.ControlPlaneEndpointInternal.Port)
+	config.JoinConfiguration.Discovery.BootstrapToken.APIServerEndpoint = fmt.Sprintf("%s:%d", cluster.Spec.ControlPlaneEndpointInternal.Host, cluster.Spec.ControlPlaneEndpointInternal.Port)
 
 	// Generate Cluster Kubeconfig if needed
 	if result, err := r.reconcileKubeconfig(ctx, cluster, kcp); !result.IsZero() || err != nil {

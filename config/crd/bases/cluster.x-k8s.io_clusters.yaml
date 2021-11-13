@@ -347,6 +347,21 @@ spec:
                 - host
                 - port
                 type: object
+              controlPlaneEndpointInternal:
+                description: ControlPlaneEndpointInternal represents the endpoint
+                  used to communicate with the control plane.
+                properties:
+                  host:
+                    description: The hostname on which the API server is serving.
+                    type: string
+                  port:
+                    description: The port on which the API server is serving.
+                    format: int32
+                    type: integer
+                required:
+                - host
+                - port
+                type: object
               controlPlaneRef:
                 description: ControlPlaneRef is an optional reference to a provider-specific
                   resource that holds the details for provisioning the Control Plane

@@ -98,6 +98,7 @@ func New(clusterName, endpoint string, caCert *x509.Certificate, caKey crypto.Si
 // CreateSecret creates the Kubeconfig secret for the given cluster.
 func CreateSecret(ctx context.Context, c client.Client, cluster *clusterv1.Cluster) error {
 	name := util.ObjectKey(cluster)
+	// TODO: mkumatag decide which endpoint to be exposed in the kubeconfig file
 	return CreateSecretWithOwner(ctx, c, name, cluster.Spec.ControlPlaneEndpoint.String(), metav1.OwnerReference{
 		APIVersion: clusterv1.GroupVersion.String(),
 		Kind:       "Cluster",

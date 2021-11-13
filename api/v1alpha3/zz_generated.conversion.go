@@ -524,6 +524,7 @@ func autoConvert_v1alpha4_ClusterSpec_To_v1alpha3_ClusterSpec(in *v1alpha4.Clust
 	if err := Convert_v1alpha4_APIEndpoint_To_v1alpha3_APIEndpoint(&in.ControlPlaneEndpoint, &out.ControlPlaneEndpoint, s); err != nil {
 		return err
 	}
+	// WARNING: in.ControlPlaneEndpointInternal requires manual conversion: does not exist in peer-type
 	out.ControlPlaneRef = (*v1.ObjectReference)(unsafe.Pointer(in.ControlPlaneRef))
 	out.InfrastructureRef = (*v1.ObjectReference)(unsafe.Pointer(in.InfrastructureRef))
 	// WARNING: in.Topology requires manual conversion: does not exist in peer-type

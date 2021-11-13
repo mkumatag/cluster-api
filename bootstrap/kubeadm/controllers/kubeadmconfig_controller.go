@@ -187,6 +187,15 @@ func (r *KubeadmConfigReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 		ConfigOwner: configOwner,
 		Cluster:     cluster,
 	}
+	// TODO: MAK Handle it properly
+	if config.Spec.JoinConfiguration == nil {
+		config.Spec.JoinConfiguration = &bootstrapv1.JoinConfiguration{}
+	}
+	if config.Spec.JoinConfiguration.Discovery.BootstrapToken == nil {
+		config.Spec.JoinConfiguration.Discovery.BootstrapToken = &bootstrapv1.BootstrapTokenDiscovery{}
+	}
+
+	config.Spec.JoinConfiguration.Discovery.BootstrapToken.APIServerEndpoint = fmt.Sprintf("%s:%d", cluster.Spec.ControlPlaneEndpointInternal.Host, cluster.Spec.ControlPlaneEndpointInternal.Port)
 
 	// Initialize the patch helper.
 	patchHelper, err := patch.NewHelper(config, r.Client)
@@ -774,12 +783,17 @@ func (r *KubeadmConfigReconciler) reconcileDiscovery(ctx context.Context, cluste
 	// if BootstrapToken already contains an APIServerEndpoint, respect it; otherwise inject the APIServerEndpoint endpoint defined in cluster status
 	apiServerEndpoint := config.Spec.JoinConfiguration.Discovery.BootstrapToken.APIServerEndpoint
 	if apiServerEndpoint == "" {
-		if !cluster.Spec.ControlPlaneEndpoint.IsValid() {
+		if !cluster.Spec.ControlPlaneEndpoint.IsValid() && !cluster.Spec.ControlPlaneEndpointInternal.IsValid(){
 			log.V(1).Info("Waiting for Cluster Controller to set Cluster.Spec.ControlPlaneEndpoint")
 			return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
 		}
 
-		apiServerEndpoint = cluster.Spec.ControlPlaneEndpoint.String()
+		cpEP := cluster.Spec.ControlPlaneEndpoint
+		if cluster.Spec.ControlPlaneEndpointInternal.IsValid() {
+			cpEP = cluster.Spec.ControlPlaneEndpointInternal
+		}
+
+		apiServerEndpoint = cpEP.String()
 		config.Spec.JoinConfiguration.Discovery.BootstrapToken.APIServerEndpoint = apiServerEndpoint
 		log.Info("Altering JoinConfiguration.Discovery.BootstrapToken", "APIServerEndpoint", apiServerEndpoint)
 	}
@@ -828,7 +842,7 @@ func (r *KubeadmConfigReconciler) reconcileTopLevelObjectSettings(ctx context.Co
 		log.Info("Altering ClusterConfiguration", "ClusterName", config.Spec.ClusterConfiguration.ClusterName)
 	}
 
-	// If there are no Network settings defined in ClusterConfiguration, use ClusterNetwork settings, if defined
+	// If there are no NetworkID settings defined in ClusterConfiguration, use ClusterNetwork settings, if defined
 	if cluster.Spec.ClusterNetwork != nil {
 		if config.Spec.ClusterConfiguration.Networking.DNSDomain == "" && cluster.Spec.ClusterNetwork.ServiceDomain != "" {
 			config.Spec.ClusterConfiguration.Networking.DNSDomain = cluster.Spec.ClusterNetwork.ServiceDomain
